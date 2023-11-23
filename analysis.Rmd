@@ -1,0 +1,50 @@
+---
+title: "analysis"
+output: html_document
+---
+
+```{r}
+#! /usr/bin/env Rscript
+set.seed(0)
+
+env <- Sys.getenv(c("storage","projects"))
+sto <- env[1]
+proj <- env[2]
+
+raw_state_data <- file.path("/Users/shuhuisun/Downloads/state_level.dta")
+
+# Bring in the .dta file
+```
+
+
+```{r}
+library(haven)
+library(dplyr)
+states <- read_dta(raw_state_data)
+
+# Remove columns with missingvariables and make index the state label
+states <- data.frame(states[,colSums(is.na(states))==0],row.names=1)
+xstates <- scale(subset(states,select=-c(stategroup)))
+
+# Final variabels kept (had to delete everything with a missing value)
+colnames(xstates)
+
+# K means 4 clusters
+grpStates <- kmeans(xstates,centers=4,nstart=10)
+```
+
+```{r}
+# Could probably find some other interesting plots but here are two
+plot(states[,"state_hbd_hc"],states[,"state_depression"])
+text(states[,"state_hbd_hc"],states[,"state_depression"],labels=rownames(xstates),col=rainbow(4)[grpStates$cluster])
+
+
+
+```
+
+```{r}
+plot(states[,"state_babycopay"],states[,"state_diabetescopay"])
+text(states[,"state_babycopay"],states[,"state_diabetescopay"],labels=rownames(xstates),col=rainbow(4)[grpStates$cluster])
+
+```
+

@@ -1,0 +1,1601 @@
+---------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/shuhuisun/Downloads/cleaner.log
+  log type:  text
+ opened on:  15 Dec 2022, 19:22:23
+
+. 
+. set more off
+
+. clear all
+
+. set matsize 800
+set matsize ignored.
+    Matrix sizes are no longer limited by c(matsize) in modern Statas.  Matrix sizes are
+    now limited by flavor of Stata.  See limits for more details.
+
+. set seed 0
+
+. global bootstraps 1000
+
+. 
+. 
+. // Set environmet variables
+. global projects: env projects
+
+. global storage: env storage
+
+. 
+. // General locations
+. global dataraw =  "/Users/shuhuisun/Downloads"
+
+. global output = "/Users/shuhuisun/Downloads"
+
+. 
+. // Load CSV Data
+. import delimited $dataraw/Plan_Attributes_PUF.csv
+(152 vars, 15,690 obs)
+
+. 
+. // Drop Dental Plans
+. drop if dentalonlyplan=="Yes"
+(2,077 observations deleted)
+
+. 
+. // Create plan type indicators
+. gen epo = 0 if plantype !=""
+
+. replace epo = 1 if plantype == "EPO"
+(2,562 real changes made)
+
+. gen hmo = 0 if plantype !=""
+
+. replace hmo = 1 if plantype == "HMO"
+(7,283 real changes made)
+
+. gen pos = 0 if plantype !=""
+
+. replace pos = 1 if plantype == "POS"
+(862 real changes made)
+
+. gen ppo = 0 if plantype !=""
+
+. replace ppo = 1 if plantype == "PPO"
+(2,906 real changes made)
+
+. 
+. // Create metal level indicators
+. gen bronze = 0 if metallevel !=""
+
+. replace bronze = 1 if metallevel == "Bronze"
+(2,479 real changes made)
+
+. gen catastrophic = 0 if metallevel !=""
+
+. replace catastrophic = 1 if metallevel == "Catastrophic"
+(416 real changes made)
+
+. gen gold = 0 if metallevel !=""
+
+. replace gold = 1 if metallevel == "Gold"
+(2,288 real changes made)
+
+. gen platinum = 0 if metallevel !=""
+
+. replace platinum = 1 if metallevel == "Platinum"
+(354 real changes made)
+
+. gen silver = 0 if metallevel !=""
+
+. replace silver = 1 if metallevel == "Silver"
+(6,912 real changes made)
+
+. gen expandedbronze = 0 if metallevel !=""
+
+. replace expandedbronze = 1 if metallevel == "Expanded Bronze"
+(1,164 real changes made)
+
+. 
+. // Pregnancy Notice Requirement
+. replace isnoticerequiredforpregnancy = "0" if isnoticerequiredforpregnancy == "No"
+(11,419 real changes made)
+
+. replace isnoticerequiredforpregnancy = "1" if isnoticerequiredforpregnancy == "Yes"
+(2,194 real changes made)
+
+. destring isnoticerequiredforpregnancy, replace
+isnoticerequiredforpregnancy: all characters numeric; replaced as byte
+
+. 
+. // Referral Required for Specialist
+. replace isreferralrequiredforspecialist = "0" if isreferralrequiredforspecialist == "No"
+(9,760 real changes made)
+
+. replace isreferralrequiredforspecialist = "1" if isreferralrequiredforspecialist == "Yes"
+(3,853 real changes made)
+
+. destring isreferralrequiredforspecialist, replace
+isreferralrequiredforspecialist: all characters numeric; replaced as byte
+
+. 
+. // Wellness Program Offered
+. replace wellnessprogramoffered = "0" if wellnessprogramoffered == "No"
+(9,793 real changes made)
+
+. replace wellnessprogramoffered = "1" if wellnessprogramoffered == "Yes"
+(3,820 real changes made)
+
+. destring wellnessprogramoffered, replace
+wellnessprogramoffered: all characters numeric; replaced as byte
+
+. 
+. // Make disease prevention program variable readible
+. gen asthma =0
+
+. replace asthma = 1 if strpos(diseasemanagementprogramsoffered, "Asthma")
+(12,614 real changes made)
+
+. 
+. gen heartdisease =0
+
+. replace heartdisease = 1 if strpos(diseasemanagementprogramsoffered, "Heart Disease")
+(10,832 real changes made)
+
+. 
+. gen depression =0
+
+. replace depression = 1 if strpos(diseasemanagementprogramsoffered, "Depression")
+(7,968 real changes made)
+
+. 
+. gen diabetes =0
+
+. replace diabetes = 1 if strpos(diseasemanagementprogramsoffered, "Diabetes")
+(12,981 real changes made)
+
+. 
+. gen hbd_hc =0
+
+. replace hbd_hc = 1 if strpos(diseasemanagementprogramsoffered, "High Blood Pressure")
+(9,933 real changes made)
+
+. 
+. gen lowerbackpain =0
+
+. replace lowerbackpain = 1 if strpos(diseasemanagementprogramsoffered, "Low Back Pain")
+(6,381 real changes made)
+
+. 
+. gen painmanagement =0
+
+. replace painmanagement = 1 if strpos(diseasemanagementprogramsoffered, "Pain Management")
+(6,044 real changes made)
+
+. 
+. gen pregnancy =0
+
+. replace pregnancy = 1 if strpos(diseasemanagementprogramsoffered, "Pregnancy")
+(8,419 real changes made)
+
+. 
+. gen weightlossprograms =0
+
+. replace weightlossprogram = 1 if strpos(diseasemanagementprogramsoffered, "")
+(13,027 real changes made)
+
+. 
+. 
+. 
+. // Out of Country Coverage
+. replace outofcountrycoverage = "0" if outofcountrycoverage == "No"
+(5,119 real changes made)
+
+. replace outofcountrycoverage = "1" if outofcountrycoverage == "Yes"
+(8,494 real changes made)
+
+. destring outofcountrycoverage, replace
+outofcountrycoverage: all characters numeric; replaced as byte
+
+. 
+. // Out of Service Coverage
+. replace outofserviceareacoverage = "0" if outofserviceareacoverage == "No"
+(4,380 real changes made)
+
+. replace outofserviceareacoverage = "1" if outofserviceareacoverage == "Yes"
+(9,233 real changes made)
+
+. destring outofserviceareacoverage, replace
+outofserviceareacoverage: all characters numeric; replaced as byte
+
+. 
+. // National Network
+. replace nationalnetwork = "0" if nationalnetwork == "No"
+(11,020 real changes made)
+
+. replace nationalnetwork = "1" if nationalnetwork == "Yes"
+(2,593 real changes made)
+
+. destring nationalnetwork, replace
+nationalnetwork: all characters numeric; replaced as byte
+
+. 
+. // Multiple In Network Tiers
+. replace multipleinnetworktiers = "0" if multipleinnetworktiers == "No"
+(10,774 real changes made)
+
+. replace multipleinnetworktiers = "1" if multipleinnetworktiers == "Yes"
+(2,839 real changes made)
+
+. destring multipleinnetworktiers, replace
+multipleinnetworktiers: all characters numeric; replaced as byte
+
+. 
+. // First/Second Tier Utilization
+. replace firsttierutilization = subinstr(firsttierutilization,"%","",.)
+(13,613 real changes made)
+
+. destring firsttierutilization, replace
+firsttierutilization: all characters numeric; replaced as double
+
+. replace secondtierutilization = subinstr(secondtierutilization,"%","",.)
+(2,839 real changes made)
+
+. destring secondtierutilization, replace
+secondtierutilization: all characters numeric; replaced as double
+(10774 missing values generated)
+
+. replace secondtierutilization = 0 if firsttierutilization == 100
+(10,774 real changes made)
+
+. 
+. // Info from Summary of Benefits Covered
+. // because of varlenght simple fracture has to be outside of loop
+. local ins = "deductible copayment coinsurance limit"
+
+. local ins2 = "deductibl copayment coinsuran limit"
+
+. local conditions "ababy diabetes"
+
+. foreach con in `conditions' {
+  2.         foreach i in `ins' {
+  3.                 replace sbchaving`con'`i' = subinstr(sbchaving`con'`i',"$","",.)
+  4.                 replace sbchaving`con'`i' = subinstr(sbchaving`con'`i',",","",.)
+  5.         destring sbchaving`con'`i', replace
+  6.         }
+  7. }
+(13,549 real changes made)
+(7,899 real changes made)
+sbchavingababydeductible: all characters numeric; replaced as int
+(13,549 real changes made)
+(875 real changes made)
+sbchavingababycopayment: all characters numeric; replaced as int
+(13,549 real changes made)
+(5,575 real changes made)
+sbchavingababycoinsurance: all characters numeric; replaced as int
+(13,549 real changes made)
+(48 real changes made)
+sbchavingababylimit: all characters numeric; replaced as int
+(13,549 real changes made)
+(6,086 real changes made)
+sbchavingdiabetesdeductible: all characters numeric; replaced as int
+(13,549 real changes made)
+(4,033 real changes made)
+sbchavingdiabetescopayment: all characters numeric; replaced as int
+(13,549 real changes made)
+(1,867 real changes made)
+sbchavingdiabetescoinsurance: all characters numeric; replaced as int
+(13,549 real changes made)
+(48 real changes made)
+sbchavingdiabeteslimit: all characters numeric; replaced as int
+
+. foreach i in `ins2' {
+  2.         replace sbchavingsimplefracture`i' = subinstr(sbchavingsimplefracture`i',"$","",
+> .)
+  3.         replace sbchavingsimplefracture`i' = subinstr(sbchavingsimplefracture`i',",","",
+> .)
+  4.         destring sbchavingsimplefracture`i', replace
+  5. }
+(13,549 real changes made)
+(6,626 real changes made)
+sbchavingsimplefracturedeductibl: all characters numeric; replaced as int
+(13,549 real changes made)
+(468 real changes made)
+sbchavingsimplefracturecopayment: all characters numeric; replaced as int
+(13,549 real changes made)
+(68 real changes made)
+sbchavingsimplefracturecoinsuran: all characters numeric; replaced as int
+(13,549 real changes made)
+(42 real changes made)
+sbchavingsimplefracturelimit: all characters numeric; replaced as int
+
+. 
+. rename sbchavingababydeductible sbchavingbabydeduct
+
+. rename sbchavingababycopayment sbchavingbabycopay
+
+. rename sbchavingababycoinsurance sbchavingbabycoin
+
+. rename sbchavingababylimit sbchavingbabylim
+
+. 
+. rename sbchavingdiabetesdeductible sbchavingdiabetesdeduct
+
+. rename sbchavingdiabetescopayment sbchavingdiabetescopay
+
+. rename sbchavingdiabetescoinsurance sbchavingdiabetescoin
+
+. rename sbchavingdiabeteslimit sbchavingdiabeteslim
+
+. 
+. rename sbchavingsimplefracturedeductibl sbchavingfracdeduct
+
+. rename sbchavingsimplefracturecopayment sbchavingfraccopay
+
+. rename sbchavingsimplefracturecoinsuran sbchavingfraccoin
+
+. rename sbchavingsimplefracturelimit sbchavingfraclim
+
+. 
+. // Specialty Drug Maximum Coinsurance
+. replace specialtydrugmaximumcoinsurance = subinstr(specialtydrugmaximumcoinsurance,"$","",.
+> )
+(1,090 real changes made)
+
+. replace specialtydrugmaximumcoinsurance = subinstr(specialtydrugmaximumcoinsurance,",","",.
+> )
+(306 real changes made)
+
+. destring specialtydrugmaximumcoinsurance, replace
+specialtydrugmaximumcoinsurance: all characters numeric; replaced as int
+(12508 missing values generated)
+
+. 
+. // Meat of the cleaning
+. tostring dehbinntier2individualmoop, replace
+dehbinntier2individualmoop was byte now str1
+
+. tostring dehbinntier2familyperpersonmoop, replace
+dehbinntier2familyperpersonmoop was byte now str1
+
+. tostring dehbinntier2familypergroupmoop, replace
+dehbinntier2familypergroupmoop was byte now str1
+
+. local vars = "m d t"
+
+. foreach var in `vars' {
+  2.         replace `var'ehbinntier1individualmoop = "" if strpos(`var'ehbinntier1individual
+> moop, "Not Applicable")
+  3.         replace `var'ehbinntier1individualmoop = "" if strpos(`var'ehbinntier1individual
+> moop, "not applicable")
+  4.         replace `var'ehbinntier1individualmoop = subinstr(`var'ehbinntier1individualmoop
+> ," ","",.)
+  5.         replace `var'ehbinntier1individualmoop = subinstr(`var'ehbinntier1individualmoop
+> ,"$","",.)
+  6.         replace `var'ehbinntier1individualmoop = subinstr(`var'ehbinntier1individualmoop
+> ,",","",.)
+  7.         replace `var'ehbinntier1individualmoop = subinstr(`var'ehbinntier1individualmoop
+> ,"perperson","",.)
+  8.         replace `var'ehbinntier1individualmoop = subinstr(`var'ehbinntier1individualmoop
+> ,"pergroup","",.)
+  9.         destring `var'ehbinntier1individualmoop, replace
+ 10.         replace `var'ehbinntier1familyperpersonmoop = "" if strpos(`var'ehbinntier1famil
+> yperpersonmoop, "Not Applicable")
+ 11.         replace `var'ehbinntier1familyperpersonmoop = "" if strpos(`var'ehbinntier1famil
+> yperpersonmoop, "not applicable")
+ 12.         replace `var'ehbinntier1familyperpersonmoop = subinstr(`var'ehbinntier1familyper
+> personmoop," ","",.)
+ 13.         replace `var'ehbinntier1familyperpersonmoop = subinstr(`var'ehbinntier1familyper
+> personmoop,"$","",.)
+ 14.         replace `var'ehbinntier1familyperpersonmoop = subinstr(`var'ehbinntier1familyper
+> personmoop,",","",.)
+ 15.         replace `var'ehbinntier1familyperpersonmoop = subinstr(`var'ehbinntier1familyper
+> personmoop,"perperson","",.)
+ 16.         replace `var'ehbinntier1familyperpersonmoop = subinstr(`var'ehbinntier1familyper
+> personmoop,"pergroup","",.)
+ 17.         destring `var'ehbinntier1familyperpersonmoop, replace
+ 18.         replace `var'ehbinntier1familypergroupmoop = "" if strpos(`var'ehbinntier1family
+> pergroupmoop, "Not Applicable")
+ 19.         replace `var'ehbinntier1familypergroupmoop = "" if strpos(`var'ehbinntier1family
+> pergroupmoop, "not applicable")
+ 20.         replace `var'ehbinntier1familypergroupmoop = subinstr(`var'ehbinntier1familyperg
+> roupmoop," ","",.)
+ 21.         replace `var'ehbinntier1familypergroupmoop = subinstr(`var'ehbinntier1familyperg
+> roupmoop,"$","",.)
+ 22.         replace `var'ehbinntier1familypergroupmoop = subinstr(`var'ehbinntier1familyperg
+> roupmoop,",","",.)
+ 23.         replace `var'ehbinntier1familypergroupmoop = subinstr(`var'ehbinntier1familyperg
+> roupmoop,"perperson","",.)
+ 24.         replace `var'ehbinntier1familypergroupmoop = subinstr(`var'ehbinntier1familyperg
+> roupmoop,"pergroup","",.)
+ 25.         destring `var'ehbinntier1familypergroupmoop, replace
+ 26.         replace `var'ehbinntier2individualmoop = "" if strpos(`var'ehbinntier2individual
+> moop, "Not Applicable")
+ 27.         replace `var'ehbinntier2individualmoop = "" if strpos(`var'ehbinntier2individual
+> moop, "not applicable")
+ 28.         replace `var'ehbinntier2individualmoop = subinstr(`var'ehbinntier2individualmoop
+> ," ","",.)
+ 29.         replace `var'ehbinntier2individualmoop = subinstr(`var'ehbinntier2individualmoop
+> ,"$","",.)
+ 30.         replace `var'ehbinntier2individualmoop = subinstr(`var'ehbinntier2individualmoop
+> ,",","",.)
+ 31.         replace `var'ehbinntier2individualmoop = subinstr(`var'ehbinntier2individualmoop
+> ,"perperson","",.)
+ 32.         replace `var'ehbinntier2individualmoop = subinstr(`var'ehbinntier2individualmoop
+> ,"pergroup","",.)
+ 33.         destring `var'ehbinntier2individualmoop, replace
+ 34.         replace `var'ehbinntier2familyperpersonmoop = "" if strpos(`var'ehbinntier2famil
+> yperpersonmoop, "Not Applicable")
+ 35.         replace `var'ehbinntier2familyperpersonmoop = "" if strpos(`var'ehbinntier2famil
+> yperpersonmoop, "not applicable")
+ 36.         replace `var'ehbinntier2familyperpersonmoop = subinstr(`var'ehbinntier2familyper
+> personmoop," ","",.)
+ 37.         replace `var'ehbinntier2familyperpersonmoop = subinstr(`var'ehbinntier2familyper
+> personmoop,"$","",.)
+ 38.         replace `var'ehbinntier2familyperpersonmoop = subinstr(`var'ehbinntier2familyper
+> personmoop,",","",.)
+ 39.         replace `var'ehbinntier2familyperpersonmoop = subinstr(`var'ehbinntier2familyper
+> personmoop,"perperson","",.)
+ 40.         replace `var'ehbinntier2familyperpersonmoop = subinstr(`var'ehbinntier2familyper
+> personmoop,"pergroup","",.)
+ 41.         destring `var'ehbinntier2familyperpersonmoop, replace
+ 42.         replace `var'ehbinntier2familypergroupmoop = "" if strpos(`var'ehbinntier2family
+> pergroupmoop, "Not Applicable")
+ 43.         replace `var'ehbinntier2familypergroupmoop = "" if strpos(`var'ehbinntier2family
+> pergroupmoop, "not applicable")
+ 44.         replace `var'ehbinntier2familypergroupmoop = subinstr(`var'ehbinntier2familyperg
+> roupmoop," ","",.)
+ 45.         replace `var'ehbinntier2familypergroupmoop = subinstr(`var'ehbinntier2familyperg
+> roupmoop,"$","",.)
+ 46.         replace `var'ehbinntier2familypergroupmoop = subinstr(`var'ehbinntier2familyperg
+> roupmoop,",","",.)
+ 47.         replace `var'ehbinntier2familypergroupmoop = subinstr(`var'ehbinntier2familyperg
+> roupmoop,"perperson","",.)
+ 48.         replace `var'ehbinntier2familypergroupmoop = subinstr(`var'ehbinntier2familyperg
+> roupmoop,"pergroup","",.)
+ 49.         destring `var'ehbinntier2familypergroupmoop, replace
+ 50.         replace `var'ehboutofnetindividualmoop = "" if strpos(`var'ehboutofnetindividual
+> moop, "Not Applicable")
+ 51.         replace `var'ehboutofnetindividualmoop = "" if strpos(`var'ehboutofnetindividual
+> moop, "not applicable")
+ 52.         replace `var'ehboutofnetindividualmoop = subinstr(`var'ehboutofnetindividualmoop
+> ," ","",.)
+ 53.         replace `var'ehboutofnetindividualmoop = subinstr(`var'ehboutofnetindividualmoop
+> ,"$","",.)
+ 54.         replace `var'ehboutofnetindividualmoop = subinstr(`var'ehboutofnetindividualmoop
+> ,",","",.)
+ 55.         replace `var'ehboutofnetindividualmoop = subinstr(`var'ehboutofnetindividualmoop
+> ,"perperson","",.)
+ 56.         replace `var'ehboutofnetindividualmoop = subinstr(`var'ehboutofnetindividualmoop
+> ,"pergroup","",.)
+ 57.         destring `var'ehboutofnetindividualmoop, replace
+ 58.         replace `var'ehboutofnetfamilyperpersonmoop = "" if strpos(`var'ehboutofnetfamil
+> yperpersonmoop, "Not Applicable")
+ 59.         replace `var'ehboutofnetfamilyperpersonmoop = "" if strpos(`var'ehboutofnetfamil
+> yperpersonmoop, "not applicable")
+ 60.         replace `var'ehboutofnetfamilyperpersonmoop = subinstr(`var'ehboutofnetfamilyper
+> personmoop," ","",.)
+ 61.         replace `var'ehboutofnetfamilyperpersonmoop = subinstr(`var'ehboutofnetfamilyper
+> personmoop,"$","",.)
+ 62.         replace `var'ehboutofnetfamilyperpersonmoop = subinstr(`var'ehboutofnetfamilyper
+> personmoop,",","",.)
+ 63.         replace `var'ehboutofnetfamilyperpersonmoop = subinstr(`var'ehboutofnetfamilyper
+> personmoop,"perperson","",.)
+ 64.         replace `var'ehboutofnetfamilyperpersonmoop = subinstr(`var'ehboutofnetfamilyper
+> personmoop,"pergroup","",.)
+ 65.         destring `var'ehboutofnetfamilyperpersonmoop, replace
+ 66.         replace `var'ehboutofnetfamilypergroupmoop = "" if strpos(`var'ehboutofnetfamily
+> pergroupmoop, "Not Applicable")
+ 67.         replace `var'ehboutofnetfamilypergroupmoop = "" if strpos(`var'ehboutofnetfamily
+> pergroupmoop, "not applicable")
+ 68.         replace `var'ehboutofnetfamilypergroupmoop = subinstr(`var'ehboutofnetfamilyperg
+> roupmoop," ","",.)
+ 69.         replace `var'ehboutofnetfamilypergroupmoop = subinstr(`var'ehboutofnetfamilyperg
+> roupmoop,"$","",.)
+ 70.         replace `var'ehboutofnetfamilypergroupmoop = subinstr(`var'ehboutofnetfamilyperg
+> roupmoop,",","",.)
+ 71.         replace `var'ehboutofnetfamilypergroupmoop = subinstr(`var'ehboutofnetfamilyperg
+> roupmoop,"perperson","",.)
+ 72.         replace `var'ehboutofnetfamilypergroupmoop = subinstr(`var'ehboutofnetfamilyperg
+> roupmoop,"pergroup","",.)
+ 73.         destring `var'ehboutofnetfamilypergroupmoop, replace
+ 74.         replace `var'ehbcombinnoonindividualmoop = "" if strpos(`var'ehbcombinnoonindivi
+> dualmoop, "Not Applicable")
+ 75.         replace `var'ehbcombinnoonindividualmoop = "" if strpos(`var'ehbcombinnoonindivi
+> dualmoop, "not applicable")
+ 76.         replace `var'ehbcombinnoonindividualmoop = subinstr(`var'ehbcombinnoonindividual
+> moop," ","",.)
+ 77.         replace `var'ehbcombinnoonindividualmoop = subinstr(`var'ehbcombinnoonindividual
+> moop,"$","",.)
+ 78.         replace `var'ehbcombinnoonindividualmoop = subinstr(`var'ehbcombinnoonindividual
+> moop,",","",.)
+ 79.         replace `var'ehbcombinnoonindividualmoop = subinstr(`var'ehbcombinnoonindividual
+> moop,"perperson","",.)
+ 80.         replace `var'ehbcombinnoonindividualmoop = subinstr(`var'ehbcombinnoonindividual
+> moop,"pergroup","",.)
+ 81.         destring `var'ehbcombinnoonindividualmoop, replace
+ 82.         replace `var'ehbcombinnoonfamilyperpersonmoo = "" if strpos(`var'ehbcombinnoonfa
+> milyperpersonmoo, "Not Applicable")
+ 83.         replace `var'ehbcombinnoonfamilyperpersonmoo = "" if strpos(`var'ehbcombinnoonfa
+> milyperpersonmoo, "not applicable")
+ 84.         replace `var'ehbcombinnoonfamilyperpersonmoo = subinstr(`var'ehbcombinnoonfamily
+> perpersonmoo," ","",.)
+ 85.         replace `var'ehbcombinnoonfamilyperpersonmoo = subinstr(`var'ehbcombinnoonfamily
+> perpersonmoo,"$","",.)
+ 86.         replace `var'ehbcombinnoonfamilyperpersonmoo = subinstr(`var'ehbcombinnoonfamily
+> perpersonmoo,",","",.)
+ 87.         replace `var'ehbcombinnoonfamilyperpersonmoo = subinstr(`var'ehbcombinnoonfamily
+> perpersonmoo,"perperson","",.)
+ 88.         replace `var'ehbcombinnoonfamilyperpersonmoo = subinstr(`var'ehbcombinnoonfamily
+> perpersonmoo,"pergroup","",.)
+ 89.         destring `var'ehbcombinnoonfamilyperpersonmoo, replace
+ 90.         replace `var'ehbcombinnoonfamilypergroupmoop = "" if strpos(`var'ehbcombinnoonfa
+> milypergroupmoop, "Not Applicable")
+ 91.         replace `var'ehbcombinnoonfamilypergroupmoop = "" if strpos(`var'ehbcombinnoonfa
+> milypergroupmoop, "not applicable")
+ 92.         replace `var'ehbcombinnoonfamilypergroupmoop = subinstr(`var'ehbcombinnoonfamily
+> pergroupmoop," ","",.)
+ 93.         replace `var'ehbcombinnoonfamilypergroupmoop = subinstr(`var'ehbcombinnoonfamily
+> pergroupmoop,"$","",.)
+ 94.         replace `var'ehbcombinnoonfamilypergroupmoop = subinstr(`var'ehbcombinnoonfamily
+> pergroupmoop,",","",.)
+ 95.         replace `var'ehbcombinnoonfamilypergroupmoop = subinstr(`var'ehbcombinnoonfamily
+> pergroupmoop,"perperson","",.)
+ 96.         replace `var'ehbcombinnoonfamilypergroupmoop = subinstr(`var'ehbcombinnoonfamily
+> pergroupmoop,"pergroup","",.)
+ 97.         destring `var'ehbcombinnoonfamilypergroupmoop, replace
+ 98.         replace `var'ehbdedinntier1individual = "" if strpos(`var'ehbdedinntier1individu
+> al, "Not Applicable")
+ 99.         replace `var'ehbdedinntier1individual = "" if strpos(`var'ehbdedinntier1individu
+> al, "not applicable")
+100.         replace `var'ehbdedinntier1individual = subinstr(`var'ehbdedinntier1individual,"
+>  ","",.)
+101.         replace `var'ehbdedinntier1individual = subinstr(`var'ehbdedinntier1individual,"
+> $","",.)
+102.         replace `var'ehbdedinntier1individual = subinstr(`var'ehbdedinntier1individual,"
+> ,","",.)
+103.         replace `var'ehbdedinntier1individual = subinstr(`var'ehbdedinntier1individual,"
+> perperson","",.)
+104.         replace `var'ehbdedinntier1individual = subinstr(`var'ehbdedinntier1individual,"
+> pergroup","",.)
+105.         destring `var'ehbdedinntier1individual, replace
+106.         replace `var'ehbdedinntier1familyperperson = "" if strpos(`var'ehbdedinntier1fam
+> ilyperperson, "Not Applicable")
+107.         replace `var'ehbdedinntier1familyperperson = "" if strpos(`var'ehbdedinntier1fam
+> ilyperperson, "not applicable")
+108.         replace `var'ehbdedinntier1familyperperson = subinstr(`var'ehbdedinntier1familyp
+> erperson," ","",.)
+109.         replace `var'ehbdedinntier1familyperperson = subinstr(`var'ehbdedinntier1familyp
+> erperson,"$","",.)
+110.         replace `var'ehbdedinntier1familyperperson = subinstr(`var'ehbdedinntier1familyp
+> erperson,",","",.)
+111.         replace `var'ehbdedinntier1familyperperson = subinstr(`var'ehbdedinntier1familyp
+> erperson,"perperson","",.)
+112.         replace `var'ehbdedinntier1familyperperson = subinstr(`var'ehbdedinntier1familyp
+> erperson,"pergroup","",.)
+113.         destring `var'ehbdedinntier1familyperperson, replace
+114.         replace `var'ehbdedinntier1familypergroup = "" if strpos(`var'ehbdedinntier1fami
+> lypergroup, "Not Applicable")
+115.         replace `var'ehbdedinntier1familypergroup = "" if strpos(`var'ehbdedinntier1fami
+> lypergroup, "not applicable")
+116.         replace `var'ehbdedinntier1familypergroup = subinstr(`var'ehbdedinntier1familype
+> rgroup," ","",.)
+117.         replace `var'ehbdedinntier1familypergroup = subinstr(`var'ehbdedinntier1familype
+> rgroup,"$","",.)
+118.         replace `var'ehbdedinntier1familypergroup = subinstr(`var'ehbdedinntier1familype
+> rgroup,",","",.)
+119.         replace `var'ehbdedinntier1familypergroup = subinstr(`var'ehbdedinntier1familype
+> rgroup,"perperson","",.)
+120.         replace `var'ehbdedinntier1familypergroup = subinstr(`var'ehbdedinntier1familype
+> rgroup,"pergroup","",.)
+121.         destring `var'ehbdedinntier1familypergroup, replace
+122.         replace `var'ehbdedinntier1coinsurance = "" if strpos(`var'ehbdedinntier1coinsur
+> ance, "Not Applicable")
+123.         replace `var'ehbdedinntier1coinsurance = "" if strpos(`var'ehbdedinntier1coinsur
+> ance, "not applicable")
+124.         replace `var'ehbdedinntier1coinsurance = subinstr(`var'ehbdedinntier1coinsurance
+> ," ","",.)
+125.         replace `var'ehbdedinntier1coinsurance = subinstr(`var'ehbdedinntier1coinsurance
+> ,"$","",.)
+126.         replace `var'ehbdedinntier1coinsurance = subinstr(`var'ehbdedinntier1coinsurance
+> ,",","",.)
+127.         replace `var'ehbdedinntier1coinsurance = subinstr(`var'ehbdedinntier1coinsurance
+> ,"perperson","",.)
+128.         replace `var'ehbdedinntier1coinsurance = subinstr(`var'ehbdedinntier1coinsurance
+> ,"pergroup","",.)
+129.         destring `var'ehbdedinntier1coinsurance, replace
+130.         replace `var'ehbdedinntier2individual = "" if strpos(`var'ehbdedinntier2individu
+> al, "Not Applicable")
+131.         replace `var'ehbdedinntier2individual = "" if strpos(`var'ehbdedinntier2individu
+> al, "not applicable")
+132.         replace `var'ehbdedinntier2individual = subinstr(`var'ehbdedinntier2individual,"
+>  ","",.)
+133.         replace `var'ehbdedinntier2individual = subinstr(`var'ehbdedinntier2individual,"
+> $","",.)
+134.         replace `var'ehbdedinntier2individual = subinstr(`var'ehbdedinntier2individual,"
+> ,","",.)
+135.         replace `var'ehbdedinntier2individual = subinstr(`var'ehbdedinntier2individual,"
+> perperson","",.)
+136.         replace `var'ehbdedinntier2individual = subinstr(`var'ehbdedinntier2individual,"
+> pergroup","",.)
+137.         destring `var'ehbdedinntier2individual, replace
+138.         replace `var'ehbdedinntier2familyperperson = "" if strpos(`var'ehbdedinntier2fam
+> ilyperperson, "Not Applicable")
+139.         replace `var'ehbdedinntier2familyperperson = "" if strpos(`var'ehbdedinntier2fam
+> ilyperperson, "not applicable")
+140.         replace `var'ehbdedinntier2familyperperson = subinstr(`var'ehbdedinntier2familyp
+> erperson," ","",.)
+141.         replace `var'ehbdedinntier2familyperperson = subinstr(`var'ehbdedinntier2familyp
+> erperson,"$","",.)
+142.         replace `var'ehbdedinntier2familyperperson = subinstr(`var'ehbdedinntier2familyp
+> erperson,",","",.)
+143.         replace `var'ehbdedinntier2familyperperson = subinstr(`var'ehbdedinntier2familyp
+> erperson,"perperson","",.)
+144.         replace `var'ehbdedinntier2familyperperson = subinstr(`var'ehbdedinntier2familyp
+> erperson,"pergroup","",.)
+145.         destring `var'ehbdedinntier2familyperperson, replace
+146.         replace `var'ehbdedinntier2familypergroup = "" if strpos(`var'ehbdedinntier2fami
+> lypergroup, "Not Applicable")
+147.         replace `var'ehbdedinntier2familypergroup = "" if strpos(`var'ehbdedinntier2fami
+> lypergroup, "not applicable")
+148.         replace `var'ehbdedinntier2familypergroup = subinstr(`var'ehbdedinntier2familype
+> rgroup," ","",.)
+149.         replace `var'ehbdedinntier2familypergroup = subinstr(`var'ehbdedinntier2familype
+> rgroup,"$","",.)
+150.         replace `var'ehbdedinntier2familypergroup = subinstr(`var'ehbdedinntier2familype
+> rgroup,",","",.)
+151.         replace `var'ehbdedinntier2familypergroup = subinstr(`var'ehbdedinntier2familype
+> rgroup,"perperson","",.)
+152.         replace `var'ehbdedinntier2familypergroup = subinstr(`var'ehbdedinntier2familype
+> rgroup,"pergroup","",.)
+153.         destring `var'ehbdedinntier2familypergroup, replace
+154.         replace `var'ehbdedinntier2coinsurance = "" if strpos(`var'ehbdedinntier2coinsur
+> ance, "Not Applicable")
+155.         replace `var'ehbdedinntier2coinsurance = "" if strpos(`var'ehbdedinntier2coinsur
+> ance, "not applicable")
+156.         replace `var'ehbdedinntier2coinsurance = subinstr(`var'ehbdedinntier2coinsurance
+> ," ","",.)
+157.         replace `var'ehbdedinntier2coinsurance = subinstr(`var'ehbdedinntier2coinsurance
+> ,"$","",.)
+158.         replace `var'ehbdedinntier2coinsurance = subinstr(`var'ehbdedinntier2coinsurance
+> ,",","",.)
+159.         replace `var'ehbdedinntier2coinsurance = subinstr(`var'ehbdedinntier2coinsurance
+> ,"perperson","",.)
+160.         replace `var'ehbdedinntier2coinsurance = subinstr(`var'ehbdedinntier2coinsurance
+> ,"pergroup","",.)
+161.         destring `var'ehbdedinntier2coinsurance, replace
+162.         replace `var'ehbdedoutofnetindividual = "" if strpos(`var'ehbdedoutofnetindividu
+> al, "Not Applicable")
+163.         replace `var'ehbdedoutofnetindividual = "" if strpos(`var'ehbdedoutofnetindividu
+> al, "not applicable")
+164.         replace `var'ehbdedoutofnetindividual = subinstr(`var'ehbdedoutofnetindividual,"
+>  ","",.)
+165.         replace `var'ehbdedoutofnetindividual = subinstr(`var'ehbdedoutofnetindividual,"
+> $","",.)
+166.         replace `var'ehbdedoutofnetindividual = subinstr(`var'ehbdedoutofnetindividual,"
+> ,","",.)
+167.         replace `var'ehbdedoutofnetindividual = subinstr(`var'ehbdedoutofnetindividual,"
+> perperson","",.)
+168.         replace `var'ehbdedoutofnetindividual = subinstr(`var'ehbdedoutofnetindividual,"
+> pergroup","",.)
+169.         destring `var'ehbdedoutofnetindividual, replace
+170.         replace `var'ehbdedoutofnetfamilyperperson = "" if strpos(`var'ehbdedoutofnetfam
+> ilyperperson, "Not Applicable")
+171.         replace `var'ehbdedoutofnetfamilyperperson = "" if strpos(`var'ehbdedoutofnetfam
+> ilyperperson, "not applicable")
+172.         replace `var'ehbdedoutofnetfamilyperperson = subinstr(`var'ehbdedoutofnetfamilyp
+> erperson," ","",.)
+173.         replace `var'ehbdedoutofnetfamilyperperson = subinstr(`var'ehbdedoutofnetfamilyp
+> erperson,"$","",.)
+174.         replace `var'ehbdedoutofnetfamilyperperson = subinstr(`var'ehbdedoutofnetfamilyp
+> erperson,",","",.)
+175.         replace `var'ehbdedoutofnetfamilyperperson = subinstr(`var'ehbdedoutofnetfamilyp
+> erperson,"perperson","",.)
+176.         replace `var'ehbdedoutofnetfamilyperperson = subinstr(`var'ehbdedoutofnetfamilyp
+> erperson,"pergroup","",.)
+177.         destring `var'ehbdedoutofnetfamilyperperson, replace
+178.         replace `var'ehbdedoutofnetfamilypergroup = "" if strpos(`var'ehbdedoutofnetfami
+> lypergroup, "Not Applicable")
+179.         replace `var'ehbdedoutofnetfamilypergroup = "" if strpos(`var'ehbdedoutofnetfami
+> lypergroup, "not applicable")
+180.         replace `var'ehbdedoutofnetfamilypergroup = subinstr(`var'ehbdedoutofnetfamilype
+> rgroup," ","",.)
+181.         replace `var'ehbdedoutofnetfamilypergroup = subinstr(`var'ehbdedoutofnetfamilype
+> rgroup,"$","",.)
+182.         replace `var'ehbdedoutofnetfamilypergroup = subinstr(`var'ehbdedoutofnetfamilype
+> rgroup,",","",.)
+183.         replace `var'ehbdedoutofnetfamilypergroup = subinstr(`var'ehbdedoutofnetfamilype
+> rgroup,"perperson","",.)
+184.         replace `var'ehbdedoutofnetfamilypergroup = subinstr(`var'ehbdedoutofnetfamilype
+> rgroup,"pergroup","",.)
+185.         destring `var'ehbdedoutofnetfamilypergroup, replace
+186.         replace `var'ehbdedcombinnoonindividual = "" if strpos(`var'ehbdedcombinnoonindi
+> vidual, "Not Applicable")
+187.         replace `var'ehbdedcombinnoonindividual = "" if strpos(`var'ehbdedcombinnoonindi
+> vidual, "not applicable")
+188.         replace `var'ehbdedcombinnoonindividual = subinstr(`var'ehbdedcombinnoonindividu
+> al," ","",.)
+189.         replace `var'ehbdedcombinnoonindividual = subinstr(`var'ehbdedcombinnoonindividu
+> al,"$","",.)
+190.         replace `var'ehbdedcombinnoonindividual = subinstr(`var'ehbdedcombinnoonindividu
+> al,",","",.)
+191.         replace `var'ehbdedcombinnoonindividual = subinstr(`var'ehbdedcombinnoonindividu
+> al,"perperson","",.)
+192.         replace `var'ehbdedcombinnoonindividual = subinstr(`var'ehbdedcombinnoonindividu
+> al,"pergroup","",.)
+193.         destring `var'ehbdedcombinnoonindividual, replace
+194.         replace `var'ehbdedcombinnoonfamilyperperson = "" if strpos(`var'ehbdedcombinnoo
+> nfamilyperperson, "Not Applicable")
+195.         replace `var'ehbdedcombinnoonfamilyperperson = "" if strpos(`var'ehbdedcombinnoo
+> nfamilyperperson, "not applicable")
+196.         replace `var'ehbdedcombinnoonfamilyperperson = subinstr(`var'ehbdedcombinnoonfam
+> ilyperperson," ","",.)
+197.         replace `var'ehbdedcombinnoonfamilyperperson = subinstr(`var'ehbdedcombinnoonfam
+> ilyperperson,"$","",.)
+198.         replace `var'ehbdedcombinnoonfamilyperperson = subinstr(`var'ehbdedcombinnoonfam
+> ilyperperson,",","",.)
+199.         replace `var'ehbdedcombinnoonfamilyperperson = subinstr(`var'ehbdedcombinnoonfam
+> ilyperperson,"perperson","",.)
+200.         replace `var'ehbdedcombinnoonfamilyperperson = subinstr(`var'ehbdedcombinnoonfam
+> ilyperperson,"pergroup","",.)
+201.         destring `var'ehbdedcombinnoonfamilyperperson, replace
+202.         replace `var'ehbdedcombinnoonfamilypergroup = "" if strpos(`var'ehbdedcombinnoon
+> familypergroup, "Not Applicable")
+203.         replace `var'ehbdedcombinnoonfamilypergroup = "" if strpos(`var'ehbdedcombinnoon
+> familypergroup, "not applicable")
+204.         replace `var'ehbdedcombinnoonfamilypergroup = subinstr(`var'ehbdedcombinnoonfami
+> lypergroup," ","",.)
+205.         replace `var'ehbdedcombinnoonfamilypergroup = subinstr(`var'ehbdedcombinnoonfami
+> lypergroup,"$","",.)
+206.         replace `var'ehbdedcombinnoonfamilypergroup = subinstr(`var'ehbdedcombinnoonfami
+> lypergroup,",","",.)
+207.         replace `var'ehbdedcombinnoonfamilypergroup = subinstr(`var'ehbdedcombinnoonfami
+> lypergroup,"perperson","",.)
+208.         replace `var'ehbdedcombinnoonfamilypergroup = subinstr(`var'ehbdedcombinnoonfami
+> lypergroup,"pergroup","",.)
+209.         destring `var'ehbdedcombinnoonfamilypergroup, replace
+210. }
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbinntier1individualmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+mehbinntier1familyperpersonmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+mehbinntier1familypergroupmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbinntier2individualmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbinntier2familyperpersonmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbinntier2familypergroupmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(6 real changes made)
+(0 real changes made)
+(2 real changes made)
+(2 real changes made)
+(2 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehboutofnetindividualmoop: all characters numeric; replaced as int
+(13611 missing values generated)
+(0 real changes made)
+(6 real changes made)
+(2 real changes made)
+(2 real changes made)
+(0 real changes made)
+(2 real changes made)
+(0 real changes made)
+mehboutofnetfamilyperpersonmoop: all characters numeric; replaced as int
+(13611 missing values generated)
+(0 real changes made)
+(6 real changes made)
+(2 real changes made)
+(2 real changes made)
+(0 real changes made)
+(0 real changes made)
+(2 real changes made)
+mehboutofnetfamilypergroupmoop: all characters numeric; replaced as int
+(13611 missing values generated)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbcombinnoonindividualmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbcombinnoonfamilyperpersonmoo: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbcombinnoonfamilypergroupmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(6 real changes made)
+(0 real changes made)
+(3,686 real changes made)
+(3,686 real changes made)
+(2,246 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedinntier1individual: all characters numeric; replaced as int
+(9927 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(3,684 real changes made)
+(3,684 real changes made)
+(134 real changes made)
+(3,684 real changes made)
+(0 real changes made)
+mehbdedinntier1familyperperson: all characters numeric; replaced as int
+(9929 missing values generated)
+(0 real changes made)
+(6 real changes made)
+(3,686 real changes made)
+(3,686 real changes made)
+(151 real changes made)
+(0 real changes made)
+(3,686 real changes made)
+mehbdedinntier1familypergroup: all characters numeric; replaced as int
+(9927 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedinntier1coinsurance: contains nonnumeric characters; no replace
+(0 real changes made)
+(0 real changes made)
+(333 real changes made)
+(333 real changes made)
+(175 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedinntier2individual: all characters numeric; replaced as int
+(13280 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(333 real changes made)
+(333 real changes made)
+(20 real changes made)
+(333 real changes made)
+(0 real changes made)
+mehbdedinntier2familyperperson: all characters numeric; replaced as int
+(13280 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(333 real changes made)
+(333 real changes made)
+(22 real changes made)
+(0 real changes made)
+(333 real changes made)
+mehbdedinntier2familypergroup: all characters numeric; replaced as int
+(13280 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedinntier2coinsurance: contains nonnumeric characters; no replace
+(2,374 real changes made)
+(0 real changes made)
+(1,318 real changes made)
+(1,318 real changes made)
+(828 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedoutofnetindividual: all characters numeric; replaced as long
+(12295 missing values generated)
+(0 real changes made)
+(2,377 real changes made)
+(1,315 real changes made)
+(1,315 real changes made)
+(163 real changes made)
+(1,315 real changes made)
+(0 real changes made)
+mehbdedoutofnetfamilyperperson: all characters numeric; replaced as long
+(12298 missing values generated)
+(0 real changes made)
+(2,374 real changes made)
+(1,318 real changes made)
+(1,318 real changes made)
+(164 real changes made)
+(0 real changes made)
+(1,318 real changes made)
+mehbdedoutofnetfamilypergroup: all characters numeric; replaced as long
+(12295 missing values generated)
+(2,882 real changes made)
+(0 real changes made)
+(810 real changes made)
+(810 real changes made)
+(299 real changes made)
+(0 real changes made)
+(0 real changes made)
+mehbdedcombinnoonindividual: all characters numeric; replaced as int
+(12803 missing values generated)
+(0 real changes made)
+(2,882 real changes made)
+(810 real changes made)
+(810 real changes made)
+(0 real changes made)
+(810 real changes made)
+(0 real changes made)
+mehbdedcombinnoonfamilyperperson: all characters numeric; replaced as int
+(12803 missing values generated)
+(0 real changes made)
+(2,882 real changes made)
+(810 real changes made)
+(810 real changes made)
+(0 real changes made)
+(0 real changes made)
+(810 real changes made)
+mehbdedcombinnoonfamilypergroup: all characters numeric; replaced as long
+(12803 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbinntier1individualmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+dehbinntier1familyperpersonmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(8 real changes made)
+dehbinntier1familypergroupmoop: all characters numeric; replaced as int
+(13605 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbinntier2individualmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbinntier2familyperpersonmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbinntier2familypergroupmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehboutofnetindividualmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehboutofnetfamilyperpersonmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehboutofnetfamilypergroupmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbcombinnoonindividualmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbcombinnoonfamilyperpersonmoo: all characters numeric; replaced as byte
+(13613 missing values generated)
+(0 real changes made)
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbcombinnoonfamilypergroupmoop: all characters numeric; replaced as byte
+(13613 missing values generated)
+(89 real changes made)
+(0 real changes made)
+(3,603 real changes made)
+(3,603 real changes made)
+(121 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedinntier1individual: all characters numeric; replaced as int
+(10010 missing values generated)
+(0 real changes made)
+(93 real changes made)
+(3,599 real changes made)
+(3,599 real changes made)
+(0 real changes made)
+(3,599 real changes made)
+(0 real changes made)
+dehbdedinntier1familyperperson: all characters numeric; replaced as int
+(10014 missing values generated)
+(0 real changes made)
+(595 real changes made)
+(3,097 real changes made)
+(3,097 real changes made)
+(0 real changes made)
+(0 real changes made)
+(3,097 real changes made)
+dehbdedinntier1familypergroup: all characters numeric; replaced as int
+(10516 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedinntier1coinsurance: contains nonnumeric characters; no replace
+(0 real changes made)
+(0 real changes made)
+(333 real changes made)
+(333 real changes made)
+(19 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedinntier2individual: all characters numeric; replaced as int
+(13280 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(333 real changes made)
+(333 real changes made)
+(0 real changes made)
+(333 real changes made)
+(0 real changes made)
+dehbdedinntier2familyperperson: all characters numeric; replaced as int
+(13280 missing values generated)
+(0 real changes made)
+(30 real changes made)
+(303 real changes made)
+(303 real changes made)
+(0 real changes made)
+(0 real changes made)
+(303 real changes made)
+dehbdedinntier2familypergroup: all characters numeric; replaced as int
+(13310 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedinntier2coinsurance: contains nonnumeric characters; no replace
+(2,799 real changes made)
+(0 real changes made)
+(893 real changes made)
+(893 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedoutofnetindividual: all characters numeric; replaced as int
+(12720 missing values generated)
+(0 real changes made)
+(2,838 real changes made)
+(854 real changes made)
+(854 real changes made)
+(0 real changes made)
+(854 real changes made)
+(0 real changes made)
+dehbdedoutofnetfamilyperperson: all characters numeric; replaced as int
+(12759 missing values generated)
+(0 real changes made)
+(3,069 real changes made)
+(623 real changes made)
+(623 real changes made)
+(0 real changes made)
+(0 real changes made)
+(623 real changes made)
+dehbdedoutofnetfamilypergroup: all characters numeric; replaced as int
+(12990 missing values generated)
+(2,693 real changes made)
+(0 real changes made)
+(999 real changes made)
+(999 real changes made)
+(76 real changes made)
+(0 real changes made)
+(0 real changes made)
+dehbdedcombinnoonindividual: all characters numeric; replaced as int
+(12614 missing values generated)
+(0 real changes made)
+(2,685 real changes made)
+(1,007 real changes made)
+(1,007 real changes made)
+(0 real changes made)
+(1,007 real changes made)
+(0 real changes made)
+dehbdedcombinnoonfamilyperperson: all characters numeric; replaced as int
+(12606 missing values generated)
+(0 real changes made)
+(2,970 real changes made)
+(722 real changes made)
+(722 real changes made)
+(0 real changes made)
+(0 real changes made)
+(722 real changes made)
+dehbdedcombinnoonfamilypergroup: all characters numeric; replaced as int
+(12891 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(13,605 real changes made)
+(13,605 real changes made)
+(10,627 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbinntier1individualmoop: all characters numeric; replaced as int
+(8 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(13,605 real changes made)
+(13,605 real changes made)
+(205 real changes made)
+(13,605 real changes made)
+(0 real changes made)
+tehbinntier1familyperpersonmoop: all characters numeric; replaced as int
+(8 missing values generated)
+(0 real changes made)
+(2 real changes made)
+(13,603 real changes made)
+(13,603 real changes made)
+(262 real changes made)
+(0 real changes made)
+(13,603 real changes made)
+tehbinntier1familypergroupmoop: all characters numeric; replaced as int
+(10 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(2,839 real changes made)
+(2,839 real changes made)
+(2,130 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbinntier2individualmoop: all characters numeric; replaced as int
+(10774 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(2,839 real changes made)
+(2,839 real changes made)
+(22 real changes made)
+(2,839 real changes made)
+(0 real changes made)
+tehbinntier2familyperpersonmoop: all characters numeric; replaced as int
+(10774 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(2,839 real changes made)
+(2,839 real changes made)
+(24 real changes made)
+(0 real changes made)
+(2,839 real changes made)
+tehbinntier2familypergroupmoop: all characters numeric; replaced as int
+(10774 missing values generated)
+(9,794 real changes made)
+(0 real changes made)
+(3,811 real changes made)
+(3,811 real changes made)
+(1,999 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehboutofnetindividualmoop: all characters numeric; replaced as int
+(9802 missing values generated)
+(0 real changes made)
+(9,793 real changes made)
+(3,812 real changes made)
+(3,812 real changes made)
+(66 real changes made)
+(3,812 real changes made)
+(0 real changes made)
+tehboutofnetfamilyperpersonmoop: all characters numeric; replaced as long
+(9801 missing values generated)
+(0 real changes made)
+(9,795 real changes made)
+(3,810 real changes made)
+(3,810 real changes made)
+(66 real changes made)
+(0 real changes made)
+(3,810 real changes made)
+tehboutofnetfamilypergroupmoop: all characters numeric; replaced as long
+(9803 missing values generated)
+(10,632 real changes made)
+(0 real changes made)
+(2,973 real changes made)
+(2,973 real changes made)
+(1,163 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbcombinnoonindividualmoop: all characters numeric; replaced as long
+(10640 missing values generated)
+(0 real changes made)
+(10,627 real changes made)
+(2,978 real changes made)
+(2,978 real changes made)
+(0 real changes made)
+(2,978 real changes made)
+(0 real changes made)
+tehbcombinnoonfamilyperpersonmoo: all characters numeric; replaced as long
+(10635 missing values generated)
+(0 real changes made)
+(10,629 real changes made)
+(2,976 real changes made)
+(2,976 real changes made)
+(0 real changes made)
+(0 real changes made)
+(2,976 real changes made)
+tehbcombinnoonfamilypergroupmoop: all characters numeric; replaced as long
+(10637 missing values generated)
+(7 real changes made)
+(0 real changes made)
+(9,931 real changes made)
+(9,931 real changes made)
+(6,258 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedinntier1individual: all characters numeric; replaced as int
+(3682 missing values generated)
+(0 real changes made)
+(401 real changes made)
+(9,537 real changes made)
+(9,537 real changes made)
+(96 real changes made)
+(9,537 real changes made)
+(0 real changes made)
+tehbdedinntier1familyperperson: all characters numeric; replaced as int
+(4076 missing values generated)
+(0 real changes made)
+(9 real changes made)
+(9,929 real changes made)
+(9,929 real changes made)
+(54 real changes made)
+(0 real changes made)
+(9,929 real changes made)
+tehbdedinntier1familypergroup: all characters numeric; replaced as int
+(3684 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedinntier1coinsurance: contains nonnumeric characters; no replace
+(3 real changes made)
+(0 real changes made)
+(2,503 real changes made)
+(2,503 real changes made)
+(1,456 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedinntier2individual: all characters numeric; replaced as int
+(11110 missing values generated)
+(0 real changes made)
+(49 real changes made)
+(2,457 real changes made)
+(2,457 real changes made)
+(0 real changes made)
+(2,457 real changes made)
+(0 real changes made)
+tehbdedinntier2familyperperson: all characters numeric; replaced as int
+(11156 missing values generated)
+(0 real changes made)
+(3 real changes made)
+(2,503 real changes made)
+(2,503 real changes made)
+(0 real changes made)
+(0 real changes made)
+(2,503 real changes made)
+tehbdedinntier2familypergroup: all characters numeric; replaced as int
+(11110 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedinntier2coinsurance: contains nonnumeric characters; no replace
+(5,642 real changes made)
+(0 real changes made)
+(4,296 real changes made)
+(4,296 real changes made)
+(2,833 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedoutofnetindividual: all characters numeric; replaced as long
+(9317 missing values generated)
+(0 real changes made)
+(5,718 real changes made)
+(4,220 real changes made)
+(4,220 real changes made)
+(54 real changes made)
+(4,220 real changes made)
+(0 real changes made)
+tehbdedoutofnetfamilyperperson: all characters numeric; replaced as long
+(9393 missing values generated)
+(0 real changes made)
+(5,666 real changes made)
+(4,272 real changes made)
+(4,272 real changes made)
+(54 real changes made)
+(0 real changes made)
+(4,272 real changes made)
+tehbdedoutofnetfamilypergroup: all characters numeric; replaced as long
+(9341 missing values generated)
+(7,138 real changes made)
+(0 real changes made)
+(2,800 real changes made)
+(2,800 real changes made)
+(1,354 real changes made)
+(0 real changes made)
+(0 real changes made)
+tehbdedcombinnoonindividual: all characters numeric; replaced as int
+(10813 missing values generated)
+(0 real changes made)
+(7,147 real changes made)
+(2,791 real changes made)
+(2,791 real changes made)
+(0 real changes made)
+(2,791 real changes made)
+(0 real changes made)
+tehbdedcombinnoonfamilyperperson: all characters numeric; replaced as int
+(10822 missing values generated)
+(0 real changes made)
+(7,139 real changes made)
+(2,799 real changes made)
+(2,799 real changes made)
+(0 real changes made)
+(0 real changes made)
+(2,799 real changes made)
+tehbdedcombinnoonfamilypergroup: all characters numeric; replaced as long
+(10814 missing values generated)
+
+. 
+. // Is HSA Eligible
+. replace ishsaeligible = "0" if ishsaeligible == "No"
+(12,344 real changes made)
+
+. replace ishsaeligible = "1" if ishsaeligible == "Yes"
+(1,269 real changes made)
+
+. destring ishsaeligible, replace
+ishsaeligible: all characters numeric; replaced as byte
+
+. 
+. // Replace state abbreviation with lowercase full name for r code later on
+. 
+. replace statecode = "alaska" if statecode =="AK"
+variable statecode was str2 now str6
+(100 real changes made)
+
+. replace statecode = "alabama" if statecode =="AL"
+variable statecode was str6 now str7
+(68 real changes made)
+
+. replace statecode = "arkansas" if statecode =="AR"
+variable statecode was str7 now str8
+(144 real changes made)
+
+. replace statecode = "arizona" if statecode =="AZ"
+(489 real changes made)
+
+. replace statecode = "delaware" if statecode =="DE"
+(39 real changes made)
+
+. replace statecode = "florida" if statecode =="FL"
+(759 real changes made)
+
+. replace statecode = "georgia" if statecode =="GA"
+(1,174 real changes made)
+
+. replace statecode = "hawaii" if statecode =="HI"
+(97 real changes made)
+
+. replace statecode = "iowa" if statecode =="IA"
+(131 real changes made)
+
+. replace statecode = "illinois" if statecode =="IL"
+(781 real changes made)
+
+. replace statecode = "indiana" if statecode =="IN"
+(133 real changes made)
+
+. replace statecode = "kansas" if statecode =="KS"
+(109 real changes made)
+
+. replace statecode = "kentucky" if statecode =="KY"
+(127 real changes made)
+
+. replace statecode = "louisiana" if statecode =="LA"
+variable statecode was str8 now str9
+(244 real changes made)
+
+. replace statecode = "maine" if statecode =="ME"
+(259 real changes made)
+
+. replace statecode = "michigan" if statecode =="MI"
+(449 real changes made)
+
+. replace statecode = "missouri" if statecode =="MO"
+(263 real changes made)
+
+. replace statecode = "mississippi" if statecode =="MS"
+variable statecode was str9 now str11
+(29 real changes made)
+
+. replace statecode = "montana" if statecode =="MT"
+(334 real changes made)
+
+. replace statecode = "north carolina" if statecode =="NC"
+variable statecode was str11 now str14
+(356 real changes made)
+
+. replace statecode = "north dakota" if statecode =="ND"
+(160 real changes made)
+
+. replace statecode = "nebraska" if statecode =="NE"
+(68 real changes made)
+
+. replace statecode = "new hampshire" if statecode =="NH"
+(111 real changes made)
+
+. replace statecode = "new jersey" if statecode =="NJ"
+(143 real changes made)
+
+. replace statecode = "new mexico" if statecode =="NM"
+(260 real changes made)
+
+. replace statecode = "nevada" if statecode =="NV"
+(75 real changes made)
+
+. replace statecode = "ohio" if statecode =="OH"
+(972 real changes made)
+
+. replace statecode = "oklahoma" if statecode =="OK"
+(230 real changes made)
+
+. replace statecode = "oregon" if statecode =="OR"
+(246 real changes made)
+
+. replace statecode = "pennsylvania" if statecode =="PA"
+(988 real changes made)
+
+. replace statecode = "south carolina" if statecode =="SC"
+(193 real changes made)
+
+. replace statecode = "south dakota" if statecode =="SD"
+(131 real changes made)
+
+. replace statecode = "tennessee" if statecode =="TN"
+(397 real changes made)
+
+. replace statecode = "texas" if statecode =="TX"
+(1,484 real changes made)
+
+. replace statecode = "utah" if statecode =="UT"
+(189 real changes made)
+
+. replace statecode = "virginia" if statecode =="VA"
+(393 real changes made)
+
+. replace statecode = "wisonconsin" if statecode =="WI"
+(1,339 real changes made)
+
+. replace statecode = "west virginia" if statecode =="WV"
+(97 real changes made)
+
+. replace statecode = "wyoming" if statecode =="WY"
+(52 real changes made)
+
+. 
+. save $output/plan_attributes_readible.dta, replace
+file /Users/shuhuisun/Downloads/plan_attributes_readible.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Users/shuhuisun/Downloads/cleaner.log
+  log type:  text
+ closed on:  15 Dec 2022, 19:22:29
+---------------------------------------------------------------------------------------------
